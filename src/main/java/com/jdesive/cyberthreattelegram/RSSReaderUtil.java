@@ -4,6 +4,7 @@ import com.jdesive.cyberthreattelegram.pojo.Article;
 import com.rometools.modules.mediarss.MediaEntryModule;
 import com.rometools.modules.mediarss.types.MediaContent;
 import com.rometools.rome.feed.module.Module;
+import com.rometools.rome.feed.synd.SyndCategory;
 import com.rometools.rome.feed.synd.SyndCategoryImpl;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RSSReaderUtil {
 
@@ -43,8 +45,7 @@ public class RSSReaderUtil {
         Article article = new Article();
         article.setTitle(syndEntry.getTitle());
         article.setPublishedDate(syndEntry.getPublishedDate().toString());
-        //Article.setImgUrl(((ArticleMediaContent)syndEntry.getContents().get(2)).getUrl());
-        article.setCategories(syndEntry.getCategories().stream().map(item -> ((SyndCategoryImpl) item).getName()).toList());
+        article.setCategories(syndEntry.getCategories().stream().map(SyndCategory::getName).collect(Collectors.toList()));
         article.setLink(syndEntry.getLink());
         article.setDescription(syndEntry.getDescription().getValue());
         article.setSource(feedName);
@@ -52,16 +53,10 @@ public class RSSReaderUtil {
         for (Module module : syndEntry.getModules()) {
             if (module instanceof MediaEntryModule) {
                 MediaEntryModule media = (MediaEntryModule) module;
-
-
                 for (MediaContent mediaContent : media.getMediaContents()) {
-
                     if (Arrays.stream(mediaContent.getMetadata().getKeywords()).anyMatch(item -> item.equalsIgnoreCase("full"))) {
-
                         article.setImgUrl(mediaContent.getReference().toString());
-
                     }
-
                 }
             }
         }
